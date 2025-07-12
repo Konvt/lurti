@@ -153,12 +153,12 @@ object.classmethod( Cat, { new = Cat.new } )
 Function that construct empty objects do not support overriding unless another metaclass is explicitly specified during inheritance.
 
 ## Meta class
-Like Python, Lurti's subtype system is built on top of the metaclass `lurti.meta.type`.
+Like Python, Lurti's subtype system is built on top of the metaclass `lurti.core.meta.type`.
 
 Its usage is the same as in Python. For creating a new metaclass, you can refer to the implementation of `ABCMeta` in `lurti.core.abc`.
 
 ## Define abstract classes/methods
-An abstract base class can be created using the metaclass `lurti.abc.ABCMeta`, but just like in python: if all the abstract methods of an abstract base class are implemented, then the abstract base class itself can also be instantiated.
+An abstract base class can be created using the metaclass `lurti.core.abc.ABCMeta`, but just like in python: if all the abstract methods of an abstract base class are implemented, then the abstract base class itself can also be instantiated.
 
 ```lua
 local lurti = require( 'path.to.lurti' )
@@ -175,11 +175,11 @@ abc.abstract( IFlyable, 'fly' )
 assert( abc.is_abstract( IFlyable ) == true )
 ```
 
-For types inherited from abstract base classes, during their creation process, `lurti.abc.ABCMeta` will reverse the MRO to collect all unimplemented abstract methods and check for any unimplemented abstract methods during the type instantiation process.
-
-If so, an error will be triggered.
+For types inherited from abstract base classes, during their creation process, `lurti.core.abc.ABCMeta` will reverse the MRO to collect all unimplemented abstract methods and check for any unimplemented abstract methods during the type instantiation process.
 
 You cannot mark abstract methods to a non-abstract base class
+
+If so, an error will be triggered.
 
 ```lua
 --- @class NormalClass
@@ -192,11 +192,11 @@ assert( ok == false )
 ```
 
 ## Mixin methods
-At certain times, if you need to mix new methods into a type, you can use `lurti.extension.mixin()`.
+At certain times, if you need to mix new methods into a type, you can use `lurti.core.extension.mixin()`.
 
 The functional implementation of this module is based on the extension methods of C#.
 
-Just like C#, `lurti.extension.mixin()` follows the following principles when mixing methods:
+Just like C#, `lurti.core.extension.mixin()` follows the following principles when mixing methods:
 
 1. An error will be triggered when a field with the same name is repeatedly mixed in;
 2. Fields of the type itself (including those obtained through inheritance) always take precedence over those that have been mixed in.
@@ -206,7 +206,7 @@ The latter is achieved by overwriting the `__index` of the type itself, so the b
 If you do not want to introduce these overheads, you can manually mix fields into the instance object yourself instead of into the type itself.
 
 ## Meta-programming
-In the modules `lurti.meta` and `lurti.rtti`, many meta-methods for reflecting the runtime type system itself are provided, including: obtaining instance types, checking whether an identifier is a type/object, and checking whether a lua object conforms to the RTTI layout, etc.
+In the modules `lurti.core.meta` and `lurti.core.rtti`, many meta-methods for reflecting the runtime type system itself are provided, including: obtaining instance types, checking whether an identifier is a type/object, and checking whether a lua object conforms to the RTTI layout, etc.
 
 For more information, you can directly refer to the corresponding file.
 
