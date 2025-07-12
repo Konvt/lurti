@@ -1,0 +1,45 @@
+
+# see https://github.com/CppCXY/EmmyLuaCodeStyle
+[*.lua]
+# [basic]
+
+# if indent_style is space, this is valid
+indent_size = 2
+# if indent_style is tab, this is valid
+tab_width = 2
+# none/single/double
+quote_style = single
+
+continuation_indent = 2
+## extend option
+continuation_indent.before_block = 2
+continuation_indent.in_expr = 2
+continuation_indent.in_table = 2
+
+# this mean utf8 length , if this is 'unset' then the line width is no longer checked
+# this option decides when to chopdown the code
+max_line_length = 110
+
+# optional crlf/lf/cr/auto, if it is 'auto', in windows it is crlf other platforms are lf
+# in neovim the value 'auto' is not a valid option, please use 'unset' 
+end_of_line = 'lf'
+
+#optional keep/never/always/smart
+trailing_table_separator = smart
+
+# [space]
+space_inside_function_call_parentheses = true
+
+space_inside_function_param_list_parentheses = true
+
+# like t[#t+1] = 1
+space_around_table_append_operator = true
+
+# convert '---' to '--- ' or '--' to '-- '
+space_after_comment_dash = true
+
+# [align]
+align_call_args = true
+
+# option none / always / only_call_stmt
+align_chain_expr = always
