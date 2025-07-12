@@ -211,7 +211,6 @@ end
 
 --- @class Type
 meta.Type = {}
-meta.Type.__index = meta.Type
 
 --- @generic T
 --- @param requirement T[] | nil
@@ -262,17 +261,6 @@ function meta.Type._instantiate( cls, ... )
   return obj
 end
 
-setmetatable( meta.Type, {
-  _rtti = {
-    metatype = 'metaclass',
-    metaclass = meta.Type,
-    mro = { index = { [meta.Type] = 1 }, order = { meta.Type } },
-  },
-  __index = meta.c3,
-  -- `meta.Type` need wait for the function `_instantiate` to be completed.
-  __call = meta.Type._instantiate,
-} )
-
 --- Create a metaclass.
 --- @generic T
 --- @param base_meta? T | T[] @ Metaclasses
@@ -285,5 +273,8 @@ function meta.extend( base_meta )
   end
   return meta.class( 'metaclass', base_meta )
 end
+
+meta.Type:_init( meta.Type:_new( 'metaclass',
+                                 meta.Type ) )
 
 return meta
