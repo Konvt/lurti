@@ -37,11 +37,14 @@ function object.classmethod( cls, method )
 end
 
 --[[
---- Compared with Python, Lua:
---- 1. cannot restrict derived classes from overriding methods/functions of base classes;
---- 2. can only check whether a base class is marked as final in object.class();
---- 3. because Lua is an interpreted language, this check is not without cost;
---- Therefore, unlike the decorator @classmethod, final functions are not provided here to restrict class inheritance.
+  In dynamic languages like Lua (including Python):
+  1. Types are objects, so types themselves can be dynamically extended;
+  2. Unlike compiled languages such as C++, they do not support more aggressive optimizations (including unvirtualization);
+  3. Because the type semantic expression of the framework cannot be applied to JIT optimization;
+  4. This leads to the coupling of the subtype system and the metaclass mechanism (specifically, checking whether a type is final when constructing a type);
+
+  Therefore, similar to Python, lurti does not provide a final marker for types;
+  According to "convention over configuration" philosophy, users should use type annotations or documentation comments to solve this problem themselves.
 ]]
 
 --- @generic T
