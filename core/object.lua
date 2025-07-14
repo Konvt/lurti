@@ -49,7 +49,7 @@ end
 
 --- @generic T
 --- @class Object
-object.Object = meta.class( 'class', nil, meta.Type )
+object.Object = meta.newtype( 'class', nil, meta.Type )
 
 --- Object method, initialize a existed Object.
 --- @return self
@@ -75,7 +75,7 @@ function object.class( base, metaclass )
   elseif base[1] == nil then
     base = { base }
   end
-  return meta.class( 'class', base, metaclass )
+  return meta.newtype( 'class', base, metaclass )
 end
 
 --- Call the next superclass init method in the MRO chain.

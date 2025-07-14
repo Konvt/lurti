@@ -57,7 +57,7 @@ function abc.is_abstract( cls )
 end
 
 --- @class ABCMeta : Type
-abc.ABCMeta = meta.extend()
+abc.ABCMeta = meta.metaclass ()
 
 --- Create a new namespace with abstract tracking.
 --- @generic T, U

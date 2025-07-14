@@ -174,7 +174,7 @@ end
 --- @param requirement? T[]
 --- @param metaclass? U
 --- @return table
-function meta.class( metatype, requirement, metaclass )
+function meta.newtype( metatype, requirement, metaclass )
   if requirement ~= nil and #requirement == 0 then requirement = nil end
   if requirement == nil and metaclass == nil then
     panic.raise( panic.KIND.TYPE_ERROR,
@@ -265,13 +265,13 @@ end
 --- @generic T
 --- @param base_meta? T | T[] @ Metaclasses
 --- @return T
-function meta.extend( base_meta )
+function meta.metaclass( base_meta )
   if base_meta == nil then
     base_meta = { meta.Type }
   elseif base_meta[1] == nil then
     base_meta = { base_meta }
   end
-  return meta.class( 'metaclass', base_meta )
+  return meta.newtype( 'metaclass', base_meta )
 end
 
 meta.Type:_init( meta.Type:_new( 'metaclass',

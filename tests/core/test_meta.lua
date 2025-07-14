@@ -2,17 +2,17 @@ local meta = require( 'core.meta' )
 local M = {}
 
 local function test_metaclassof()
-  local cls = meta.class( 'TestClass', {}, meta.Type )
+  local cls = meta.newtype( 'TestClass', {}, meta.Type )
   local mc = meta.metaclassof( cls )
   assert( mc == meta.Type,
           'metaclassof returns meta.Type' )
 end
 
 local function test_mroof()
-  local A = meta.class( 'A', {}, meta.Type )
-  local B = meta.class( 'B', { A }, meta.Type )
-  local C = meta.class( 'C', { A }, meta.Type )
-  local D = meta.class( 'D', { B, C }, meta.Type )
+  local A = meta.newtype( 'A', {}, meta.Type )
+  local B = meta.newtype( 'B', { A }, meta.Type )
+  local C = meta.newtype( 'C', { A }, meta.Type )
+  local D = meta.newtype( 'D', { B, C }, meta.Type )
 
   local mroD = meta.mroof( D )
   assert( mroD.order[1] == D and mroD.index[D] == 1,
@@ -26,9 +26,9 @@ local function test_mroof()
 end
 
 local function test_is_base_of()
-  local A = meta.class( 'A', {}, meta.Type )
-  local B = meta.class( 'B', { A }, meta.Type )
-  local C = meta.class( 'C', {}, meta.Type )
+  local A = meta.newtype( 'A', {}, meta.Type )
+  local B = meta.newtype( 'B', { A }, meta.Type )
+  local C = meta.newtype( 'C', {}, meta.Type )
 
   assert( meta.is_base_of( A, B ) == true,
           'is_base_of true for base' )
@@ -41,8 +41,8 @@ local function test_is_base_of()
 end
 
 local function test_super()
-  local A = meta.class( 'A', {}, meta.Type )
-  local B = meta.class( 'B', { A }, meta.Type )
+  local A = meta.newtype( 'A', {}, meta.Type )
+  local B = meta.newtype( 'B', { A }, meta.Type )
   local b_inst = B()
   local s = meta.super( b_inst )
   assert( s == A,
@@ -50,9 +50,9 @@ local function test_super()
 end
 
 local function test_c3()
-  local A = meta.class( 'A', {}, meta.Type )
+  local A = meta.newtype( 'A', {}, meta.Type )
   A.foo = 'foo'
-  local B = meta.class( 'B', { A }, meta.Type )
+  local B = meta.newtype( 'B', { A }, meta.Type )
   B.bar = 'bar'
   local b = B()
 
@@ -65,23 +65,23 @@ local function test_c3()
 end
 
 local function test_class_conflict()
-  local M1 = meta.extend()
+  local M1 = meta.metaclass()
   function M1:_init( ns, req )
     ns.conflict = 'm1'
     return ns
   end
 
-  local M2 = meta.extend()
+  local M2 = meta.metaclass()
   function M2:_init( ns, req )
     ns.conflict = 'm2'
     return ns
   end
 
-  local C1 = meta.class( 'C1', {}, M1 )
-  local C2 = meta.class( 'C2', {}, M2 )
+  local C1 = meta.newtype( 'C1', {}, M1 )
+  local C2 = meta.newtype( 'C2', {}, M2 )
 
   local ok, err = pcall( function()
-    meta.class( 'Conflict', { C1, C2 } )
+    meta.newtype( 'Conflict', { C1, C2 } )
   end )
   assert( not ok and err ~= nil and err:match( 'conflicting metaclasses' ),
           'class detects conflicting metaclasses' )
