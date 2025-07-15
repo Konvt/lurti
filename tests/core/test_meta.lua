@@ -66,13 +66,13 @@ end
 
 local function test_class_conflict()
   local M1 = meta.metaclass()
-  function M1:_init( ns, req )
+  function M1:_init_( ns, req )
     ns.conflict = 'm1'
     return ns
   end
 
   local M2 = meta.metaclass()
-  function M2:_init( ns, req )
+  function M2:_init_( ns, req )
     ns.conflict = 'm2'
     return ns
   end

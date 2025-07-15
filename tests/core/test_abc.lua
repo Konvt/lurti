@@ -2,13 +2,13 @@ local abc = require( 'core.abc' )
 local object = require( 'core.object' )
 local M = {}
 
-function M.test_ABCMeta_init()
+local function test_ABCMeta_init()
   local cls = object.class( nil, abc.ABCMeta )
   assert( type( rawget( cls, '__abstract__' ) ) == 'table',
           'ABCMeta sets __abstract__' )
 end
 
-function M.test_abstract_mark()
+local function test_abstract_mark()
   local C = object.class( nil, abc.ABCMeta )
   abc.abstract( C, 'foo' )
   assert( C.__abstract__.foo == C, 'abstract marks method' )
@@ -17,7 +17,7 @@ function M.test_abstract_mark()
           'abstract marks multiple methods' )
 end
 
-function M.test_is_abstract_false()
+local function test_is_abstract_false()
   local C = object.class()
   assert( abc.is_abstract( C ) == false,
           'is_abstract detects concrete without ABCMeta' )
@@ -26,7 +26,7 @@ function M.test_is_abstract_false()
           'is_abstract detects concrete with ABCMeta but no abstract methods' )
 end
 
-function M.test_is_abstract_true()
+local function test_is_abstract_true()
   local C = object.class( nil, abc.ABCMeta )
   abc.abstract( C, 'foo' )
   abc.foo = function() end -- ignored
@@ -44,14 +44,14 @@ function M.test_is_abstract_true()
           'is_abstract detects implemented method' )
 end
 
-function M.test_abstract_on_non_abstract()
+local function test_abstract_on_non_abstract()
   local C = object.class()
   local ok, err = pcall( function() abc.abstract( C, 'foo' ) end )
   assert( not ok and err ~= nil and err:match( 'non%-abstract base classes' ),
           'abstract raises on non-abstract base class' )
 end
 
-function M.test_abstract_instantiation()
+local function test_abstract_instantiation()
   local C = object.class( nil, abc.ABCMeta )
   abc.abstract( C, 'foo' )
   local ok, err = pcall( function() abc.ABCMeta._instantiate( C ) end )
@@ -59,7 +59,7 @@ function M.test_abstract_instantiation()
           'abstract prevents instantiation' )
 end
 
-function M.test_clone_returns_deepcopy()
+local function test_clone_returns_deepcopy()
   local O = object.class( abc.ICopyable )
   local o = O()
   o.data = { nested = { 42 } }
@@ -68,7 +68,7 @@ function M.test_clone_returns_deepcopy()
           'clone should return deep copy' )
 end
 
-function M.test_copy_returns_shallowcopy()
+local function test_copy_returns_shallowcopy()
   local O = object.class( abc.ICopyable )
   local o = O()
   o.data = { nested = { 42 } }
@@ -78,14 +78,14 @@ function M.test_copy_returns_shallowcopy()
 end
 
 function M.run()
-  M.test_ABCMeta_init()
-  M.test_abstract_mark()
-  M.test_is_abstract_false()
-  M.test_is_abstract_true()
-  M.test_abstract_on_non_abstract()
-  M.test_abstract_instantiation()
-  M.test_clone_returns_deepcopy()
-  M.test_copy_returns_shallowcopy()
+  test_ABCMeta_init()
+  test_abstract_mark()
+  test_is_abstract_false()
+  test_is_abstract_true()
+  test_abstract_on_non_abstract()
+  test_abstract_instantiation()
+  test_clone_returns_deepcopy()
+  test_copy_returns_shallowcopy()
   print( 'abc tests all passed.' )
 end
 

@@ -65,8 +65,8 @@ abc.ABCMeta = meta.metaclass()
 --- @param requirement T[]
 --- @param namespace U
 --- @return U
-function abc.ABCMeta:_new( metatype, requirement, namespace )
-  namespace = meta.super( self, abc.ABCMeta )._new( self, metatype, requirement, namespace )
+function abc.ABCMeta:_new_( metatype, requirement, namespace )
+  namespace = meta.super( self, abc.ABCMeta )._new_( self, metatype, requirement, namespace )
   --- @type table<string, Object>
   local abstract = {}
   return rawset( namespace, '__abstract__', abstract )
@@ -77,9 +77,9 @@ end
 --- @param requirement T[]
 --- @param namespace U
 --- @return U
-function abc.ABCMeta:_init( requirement, namespace )
+function abc.ABCMeta:_init_( requirement, namespace )
   -- assert( type( rawget( namespace, '__abstract__' ) ) == 'table' )
-  namespace = meta.super( self, abc.ABCMeta )._init( self, requirement, namespace )
+  namespace = meta.super( self, abc.ABCMeta )._init_( self, requirement, namespace )
   --- @type table<string, Object>
   local abstract = {}
   local mro_chain = meta.mroof( namespace ).order
@@ -110,11 +110,11 @@ end
 --- @generic T
 --- @param cls T
 --- @return T
-function abc.ABCMeta:_instantiate( cls, ... )
+function abc.ABCMeta:_instantiate_( cls, ... )
   if abc.is_abstract( cls ) then
     panic.raise( panic.KIND.TYPE_ERROR, 'attempt to instantiate an abstract class' )
   end
-  return meta.super( self, abc.ABCMeta ):_instantiate( cls, ... )
+  return meta.super( self, abc.ABCMeta ):_instantiate_( cls, ... )
 end
 
 --- @class ICopyable : Object

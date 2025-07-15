@@ -203,10 +203,10 @@ function meta.newtype( metatype, requirement, metaclass )
     end
   end
 
-  return metaclass:_init( metaclass:_new( metatype,
-                                          metaclass:_prepare( requirement ),
-                                          requirement ),
-                          requirement )
+  return metaclass:_init_( metaclass:_new_( metatype,
+                                            metaclass:_prepare_( requirement ),
+                                            requirement ),
+                           requirement )
 end
 
 --- Mark functions as class methods on a class,
@@ -258,7 +258,7 @@ meta.Type = {}
 
 --- @generic T
 --- @param requirement T[] | nil
-function meta.Type:_prepare( requirement )
+function meta.Type:_prepare_( requirement )
   return {}
 end
 
@@ -268,7 +268,7 @@ end
 --- @param namespace U
 --- @param requirement T[] | nil
 --- @return U
-function meta.Type:_new( metatype, namespace, requirement )
+function meta.Type:_new_( metatype, namespace, requirement )
   namespace.__index = namespace
   setmetatable(
     namespace,
@@ -280,7 +280,7 @@ function meta.Type:_new( metatype, namespace, requirement )
       },
       __index = meta.c3,
       __call = function( cls, ... )
-        return self:_instantiate( cls, ... )
+        return self:_instantiate_( cls, ... )
       end,
     } )
   meta.mroof( namespace )
@@ -292,7 +292,7 @@ end
 --- @param namespace U
 --- @param requirement T[] | nil
 --- @return U
-function meta.Type:_init( namespace, requirement )
+function meta.Type:_init_( namespace, requirement )
   return namespace
 end
 
@@ -301,7 +301,7 @@ end
 --- @generic T
 --- @param cls T
 --- @return T
-function meta.Type:_instantiate( cls, ... )
+function meta.Type:_instantiate_( cls, ... )
   -- assert( rtti.is_type( cls ) )
   local obj = setmetatable( {}, cls )
   return obj
@@ -320,7 +320,7 @@ function meta.metaclass( base_meta )
   return meta.newtype( 'metaclass', base_meta )
 end
 
-meta.Type:_init( meta.Type:_new( 'metaclass',
-                                 meta.Type ) )
+meta.Type:_init_( meta.Type:_new_( 'metaclass',
+                                   meta.Type ) )
 
 return meta
