@@ -1,6 +1,5 @@
 local panic = require( 'core.panic' )
 local meta = require( 'core.meta' )
-local object = require( 'core.object' )
 --- Python Abstract Base Class for Lua.
 ---
 --- Expected layout:
@@ -118,9 +117,9 @@ function abc.ABCMeta:_instantiate_( cls, ... )
 end
 
 --- @class ICopyable : Object
-abc.ICopyable = object.class( nil, abc.ABCMeta )
+abc.ICopyable = meta.class( nil, abc.ABCMeta )
 
---- Return a deep copy of the object.
+--- Return a deep copy of the meta.
 function abc.ICopyable:clone()
   --- @generic T
   --- @param orig T
@@ -145,7 +144,7 @@ function abc.ICopyable:clone()
   return deepcopy( self )
 end
 
---- Return a shallow copy of the object.
+--- Return a shallow copy of the meta.
 function abc.ICopyable:copy()
   --- @param orig any
   --- @return any

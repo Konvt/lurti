@@ -1,12 +1,12 @@
 local panic = require( 'core.panic' )
-local object = require( 'core.object' )
+local meta = require( 'core.meta' )
 --- Rust Option for Lua.
 local option = {}
 
 --- @class Option<T> : Object
 --- @field private _is_some boolean
 --- @field private _val T
-option.Option = object.class()
+option.Option = meta.class()
 
 --- Initialize a Option instance with status and value.
 --- @generic T
@@ -14,7 +14,7 @@ option.Option = object.class()
 --- @param value? T
 --- @return self
 function option.Option:init( is_some, value )
-  object.init_super( option.Option, self )
+  meta.init_super( option.Option, self )
   self._is_some = is_some
   self._val = value
   return self
@@ -38,7 +38,7 @@ function option.Some( value )
   return option.Option:new( true, value )
 end
 
---- Create a null Option object.
+--- Create a null Option meta.
 --- @generic T
 --- @return Option<T>
 function option.None()

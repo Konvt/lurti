@@ -1,3 +1,4 @@
+local rtti = require( 'core.rtti' )
 local meta = require( 'core.meta' )
 local M = {}
 
@@ -87,6 +88,54 @@ local function test_class_conflict()
           'class detects conflicting metaclasses' )
 end
 
+local function test_type_layer()
+  assert( meta.is_base_of( meta.Object, meta.Type ) )
+end
+
+local function test_object_new()
+  local cls = meta.class()
+  local inst = cls:new()
+  assert( rtti.is_object( inst ) == true,
+          'Object is instance' )
+end
+
+local function test_init_super()
+  local Base = meta.class()
+  function Base:init()
+    self.base_inited = true
+    return self
+  end
+
+  local Derived = meta.class( Base )
+  function Derived:init()
+    meta.init_super( Derived, self )
+    self.derived_inited = true
+    return self
+  end
+
+  local inst = Derived:new()
+  assert( inst.base_inited == true,
+          'Super init sets base_inited' )
+  assert( inst.derived_inited == true,
+          'Init sets derived_inited' )
+end
+
+local function test_class_with_metaclass()
+  local metaclass = meta.Type
+  local cls = meta.class( nil, metaclass )
+  local inst = cls:new()
+  assert( rtti.is_object( inst ) == true,
+          'Object with metaclass is meta' )
+end
+
+local function test_object_init()
+  local cls = meta.class()
+  local inst = cls:new()
+  local ret = inst:init()
+  assert( ret == inst,
+          'Init returns self' )
+end
+
 function M.run()
   test_metaclassof()
   test_mroof()
@@ -94,6 +143,11 @@ function M.run()
   test_super()
   test_c3()
   test_class_conflict()
+  test_type_layer()
+  test_object_new()
+  test_init_super()
+  test_class_with_metaclass()
+  test_object_init()
   print( 'meta tests all passed.' )
 end
 

@@ -19,7 +19,6 @@ return {
       panic = 'panic',
       rtti = 'rtti',
       meta = 'meta',
-      object = 'object',
       abc = 'abc',
       result = 'result',
       extension = 'extension',

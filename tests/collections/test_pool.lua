@@ -1,10 +1,10 @@
 local pool = require( 'collections.pool' )
-local object = require( 'core.object' )
+local meta = require( 'core.meta' )
 local abc = require( 'core.abc' )
 local M = {}
 
 --- @class Dummy
-local Dummy = object.class( abc.ICopyable )
+local Dummy = meta.class( abc.ICopyable )
 
 function Dummy:init( val )
   self.val = val
@@ -51,7 +51,7 @@ local function test_pop()
   local p = pool.ObjectPool:new( Dummy( 1 ) ):produce( 2 )
   local obj = p:pop()
   assert( obj ~= nil,
-          'ObjectPool pop returns object' )
+          'ObjectPool pop returns meta' )
   assert( p:size() == 1,
           'ObjectPool pop removes one from buffer' )
 end
@@ -70,7 +70,7 @@ local function test_push()
   local p = pool.ObjectPool:new( Dummy( 1 ) )
   p:push( Dummy( 7 ) )
   assert( p:size() == 1,
-          'ObjectPool push adds single object' )
+          'ObjectPool push adds single meta' )
 end
 
 local function test_remove()
@@ -79,7 +79,7 @@ local function test_remove()
   p:push( obj )
   local removed = p:remove( obj )
   assert( removed == obj,
-          'ObjectPool remove returns removed object' )
+          'ObjectPool remove returns removed meta' )
   assert( p:size() == 0,
           'ObjectPool remove reduces buffer' )
 end

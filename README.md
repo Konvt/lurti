@@ -24,16 +24,16 @@ local lurti = require( 'path.to.lurti.dynamic' )
 ## Define a class
 ```lua
 local lurti = require( 'path.to.lurti' )
-local object = lurti.core.object
+local meta = lurti.core.meta
 
 --- @class Dog : Object @ By default, it is derived from Object.
 --- @field name string
-local Dog = object.class()
+local Dog = meta.class()
 
 --- @param name string
 --- @return self
 function Dog:init( name ) -- an override
-  object.init_super( Dog, self )
+  meta.init_super( Dog, self )
   self.name = name
   return self
 end
@@ -56,31 +56,31 @@ Lurti uses MRO to handle multiple inheritance relationships, so its usage method
 
 ```lua
 local lurti = require( 'path.to.lurti' )
-local object = lurti.core.object
+local meta = lurti.core.meta
 
-local A = object.class()
+local A = meta.class()
 function A:init()
-  object.init_super( A, self )
+  meta.init_super( A, self )
   print( 'A' )
 end
 
-local B = object.class( A )
+local B = meta.class( A )
 function B:init()
-  object.init_super( B, self )
+  meta.init_super( B, self )
   print( 'B' )
 end
 
 
-local C = object.class( A )
+local C = meta.class( A )
 function C:init()
-  object.init_super( C, self )
+  meta.init_super( C, self )
   print( 'C' )
 end
 
 
-local D = object.class( { B, C } )
+local D = meta.class( { B, C } )
 function D:init()
-  object.init_super( D, self )
+  meta.init_super( D, self )
   print( 'D' )
 end
 
@@ -97,29 +97,29 @@ Lurti provides the following construction methods by default:
 
 ```lua
 local lurti = require( 'path.to.lurti' )
-local object = lurti.core.object
+local meta = lurti.core.meta
 
 --- Construct an emtpy object:
-local obj = object.Object()
+local obj = meta.Object()
 
 --- Initialize an existing object
 obj:init()
 
 --- Construct and initialize an object:
-local onestep = object.Object:new()
+local onestep = meta.Object:new()
 ```
 
-Normally, types derived from `Object` only need to provide an override of the `init()` function and call `object.init_super()` within `init()` to initialize the base class.
+Normally, types derived from `Object` only need to provide an override of the `init()` function and call `meta.init_super()` within `init()` to initialize the base class.
 
 ```lua
 --- @class Cat : Object
 --- @field name string
-local Cat = object.class()
+local Cat = meta.class()
 
 --- @param name string
 --- @return self
 function Cat:init( name )
-  object.init_super( Cat, self )
+  meta.init_super( Cat, self )
   self.name = name
   return self
 end
@@ -136,15 +136,15 @@ At this point, you can explicitly provide a rewrite of `new()`.
 --- @return T
 function Cat.new( cls, name ) -- Please note: The new() should be a class method
   return cls():init( name ) -- or:
-  -- return object.Object:new( name )
+  -- return meta.Object:new( name )
 end
 
---- If you don't mind the performance overhead, then you can use the object.classMethod() function
+--- If you don't mind the performance overhead, then you can use the meta.classMethod() function
 --- to mark the new() as a classmethod.
 ---
 --- In this way, even if the method is called on an instance object,
 --- it can be correctly called as the type itself.
-object.classmethod( Cat, { new = Cat.new } )
+meta.classmethod( Cat, { new = Cat.new } )
 
 --- If you attempt to bind a non-existent function, an error will be triggered.
 --- Therefore, you should mark a function as a class method after defining it.
@@ -166,7 +166,7 @@ local object = lurti.core.object
 local abc = lurti.core.abc
 
 --- @class IFlyable
-local IFlyable = object.class( nil, abc.ABCMeta )
+local IFlyable = meta.class( nil, abc.ABCMeta )
 
 assert( abc.is_abstract( IFlyable ) == false )
 
@@ -183,7 +183,7 @@ If so, an error will be triggered.
 
 ```lua
 --- @class NormalClass
-local NormalClass = object.class()
+local NormalClass = meta.class()
 
 local ok, err = pcall( function()
   abc.abstract( NormalClass, 'dosomething' )

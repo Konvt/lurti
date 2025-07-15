@@ -63,8 +63,8 @@ local function test_conflict_raises()
 end
 
 local function test_object_extension_interaction()
-  local object = require( 'core.object' )
-  local Bird = object.class()
+  local meta = require( 'core.meta' )
+  local Bird = meta.class()
   local sparrow = Bird()
 
   extension.mixin( Bird, {

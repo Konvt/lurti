@@ -320,7 +320,53 @@ function meta.metaclass( base_meta )
   return meta.newtype( 'metaclass', base_meta )
 end
 
-meta.Type:_init_( meta.Type:_new_( 'metaclass',
-                                   meta.Type ) )
+--- @generic T
+--- @class Object
+meta.Object = meta.newtype( 'class', nil, meta.Type )
+
+--- Object method, initialize a existed Object.
+--- @return self
+function meta.Object:init()
+  -- assert( rtti.is_object( self ) )
+  return self
+end
+
+--- Class method, create and initialize a new Object.
+--- @return self
+function meta.Object:new( ... )
+  return self():init( ... )
+end
+
+-- cycle reference, as same as Python
+do
+  local requirement = { meta.Object }
+  meta.Type:_init_( meta.Type:_new_( 'metaclass',
+                                     meta.Type, requirement ),
+                    requirement )
+end
+
+--- @generic T, U
+--- @param base? T | T[]
+--- @param metaclass? Type
+--- @return U
+function meta.class( base, metaclass )
+  if base == nil then
+    base = { meta.Object }
+  elseif base[1] == nil then
+    base = { base }
+  end
+  return meta.newtype( 'class', base, metaclass )
+end
+
+--- Call the next superclass init method in the MRO chain.
+--- @generic T, U
+--- @param cls T @ caller class type
+--- @param obj U @ instance being initialized
+--- @param ... any @ arguments passed to superclass init
+--- @return U
+function meta.init_super( cls, obj, ... )
+  -- assert( mro_table.index[cls] ~= nil )
+  return meta.super( obj, cls ).init( obj, ... )
+end
 
 return meta

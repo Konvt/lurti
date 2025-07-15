@@ -1,17 +1,17 @@
-local object    = require( 'core.object' )
+local meta      = require( 'core.meta' )
 local pool      = {}
 
 --- @class ObjectPool<T> : Object
 --- @field private prototype ICopyable
 --- @field buffer T[]
-pool.ObjectPool = object.class()
+pool.ObjectPool = meta.class()
 
 --- Produce initial objects in the pool.
 --- @param prototype ICopyable
 --- @param num integer @ The number of objects to produce initially.
 --- @return self
 function pool.ObjectPool:init( prototype, num )
-  object.init_super( pool.ObjectPool, self )
+  meta.init_super( pool.ObjectPool, self )
   self.prototype = prototype:clone()
   self.buffer = {}
   return self:produce( num )

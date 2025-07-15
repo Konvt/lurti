@@ -1,12 +1,12 @@
 local panic = require( 'core.panic' )
-local object = require( 'core.object' )
+local meta = require( 'core.meta' )
 --- Rust Result for Lua.
 local result = {}
 
 --- @class Result<T, E> : Object
 --- @field private _is_ok boolean
 --- @field private _val T | E
-result.Result = object.class()
+result.Result = meta.class()
 
 --- Initialize a Result instance with status and value.
 --- @generic T, E
@@ -14,7 +14,7 @@ result.Result = object.class()
 --- @param value T | E
 --- @return self
 function result.Result:init( ok, value )
-  object.init_super( result.Result, self )
+  meta.init_super( result.Result, self )
   self._is_ok = ok
   self._val = value
   return self

@@ -1,16 +1,16 @@
+local rtti = require( 'core.rtti' )
 local meta = require( 'core.meta' )
-local object = require( 'core.object' )
 local enum = require( 'core.enum' )
 local M = {}
 
 local function test_basic()
   --- @enum Color
-  local Color = object.class( enum.Enum )
+  local Color = meta.class( enum.Enum )
   Color.RED = 1
   Color.GREEN = 2
   --- @diagnostic disable
-  assert( meta.is_base_of( Color, Color.RED ) )
-  assert( meta.is_base_of( Color, Color.GREEN ) )
+  assert( rtti.typeof( Color.RED ) == Color )
+  assert( rtti.typeof( Color, Color.GREEN ) == Color )
   assert( Color.RED.name == 'RED' )
   assert( Color.GREEN.name == 'GREEN' )
   assert( Color.RED.value == 1 )
@@ -19,7 +19,7 @@ end
 
 local function test_auto()
   --- @enum Test
-  local Test = object.class( enum.Enum )
+  local Test = meta.class( enum.Enum )
   Test.A = 10
   Test.B = 3
   Test.C = enum.auto

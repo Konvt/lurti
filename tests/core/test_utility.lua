@@ -1,6 +1,6 @@
 local option = require( 'core.option' )
 local result = require( 'core.result' )
-local utility = require( 'core.utility' )
+local _utility = require( 'core.utility' )
 local M = {}
 
 local function test_ok_or_some()

@@ -1,5 +1,4 @@
 local meta = require( 'core.meta' )
-local object = require( 'core.object' )
 local panic = require( 'core.panic' )
 local enum = {}
 
@@ -60,7 +59,7 @@ function enum.EnumMeta:_instantiate_( cls, ... )
   return meta.super( self, enum.EnumMeta ):_instantiate_( cls, ... )
 end
 
-enum.Enum = object.class( nil, enum.EnumMeta )
+enum.Enum = meta.class( nil, enum.EnumMeta )
 
 --- @generic T
 --- @param name string
