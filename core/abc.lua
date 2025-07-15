@@ -57,7 +57,7 @@ function abc.is_abstract( cls )
 end
 
 --- @class ABCMeta : Type
-abc.ABCMeta = meta.metaclass ()
+abc.ABCMeta = meta.metaclass()
 
 --- Create a new namespace with abstract tracking.
 --- @generic T, U
@@ -66,7 +66,7 @@ abc.ABCMeta = meta.metaclass ()
 --- @param namespace U
 --- @return U
 function abc.ABCMeta:_new( metatype, requirement, namespace )
-  namespace = meta.super( self )._new( self, metatype, requirement, namespace )
+  namespace = meta.super( self, abc.ABCMeta )._new( self, metatype, requirement, namespace )
   --- @type table<string, Object>
   local abstract = {}
   return rawset( namespace, '__abstract__', abstract )
@@ -79,7 +79,7 @@ end
 --- @return U
 function abc.ABCMeta:_init( requirement, namespace )
   -- assert( type( rawget( namespace, '__abstract__' ) ) == 'table' )
-  namespace = meta.super( self ):_init( requirement, namespace )
+  namespace = meta.super( self, abc.ABCMeta )._init( self, requirement, namespace )
   --- @type table<string, Object>
   local abstract = {}
   local mro_chain = meta.mroof( namespace ).order
@@ -110,24 +110,54 @@ end
 --- @generic T
 --- @param cls T
 --- @return T
-function abc.ABCMeta._instantiate( cls, ... )
+function abc.ABCMeta:_instantiate( cls, ... )
   if abc.is_abstract( cls ) then
     panic.raise( panic.KIND.TYPE_ERROR, 'attempt to instantiate an abstract class' )
   end
-  return meta.super( abc.ABCMeta )._instantiate( cls, ... )
+  return meta.super( self, abc.ABCMeta ):_instantiate( cls, ... )
 end
 
 --- @class ICopyable : Object
 abc.ICopyable = object.class( nil, abc.ABCMeta )
 
 --- Return a deep copy of the object.
-function abc.ICopyable:deepcopy()
-  return abc.deepcopy( self )
+function abc.ICopyable:clone()
+  --- @generic T
+  --- @param orig T
+  --- @param cache? table
+  --- @return T
+  local function deepcopy( orig, cache )
+    if type( orig ) ~= 'table' then return orig end
+    cache = cache or {}
+    if cache[orig] then
+      return cache[orig]
+    end
+
+    local copy = {}
+    cache[orig] = copy
+    for k, v in pairs( orig ) do
+      copy[deepcopy( k, cache )] = deepcopy( v, cache )
+    end
+    -- metatable is used as type info and it is unique.
+    setmetatable( copy, getmetatable( orig ) )
+    return copy
+  end
+  return deepcopy( self )
 end
 
 --- Return a shallow copy of the object.
-function abc.ICopyable:shallowcopy()
-  return abc.shallowcopy( self )
+function abc.ICopyable:copy()
+  --- @param orig any
+  --- @return any
+  local function shallowcopy( orig )
+    if type( orig ) ~= 'table' then return orig end
+    local copy = {}
+    for k, v in pairs( orig ) do
+      copy[k] = v
+    end
+    return copy
+  end
+  return shallowcopy( self )
 end
 
 return abc

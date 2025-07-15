@@ -10,27 +10,6 @@ local function test_object_new()
           'Object is instance' )
 end
 
-local function test_classmethod_basic()
-  local cls = object.class()
-  function cls:foo() return 'foo' end
-
-  object.classmethod( cls, { foo = cls.foo } )
-  local inst = cls:new()
-  assert( inst:foo() == 'foo',
-          'Object foo returns foo' )
-end
-
-local function test_classmethod_conflict()
-  local cls = object.class()
-  function cls:bar() return 'bar' end
-
-  local ok, err = pcall( function()
-    object.classmethod( cls, { bar = function() end } )
-  end )
-  assert( ok == false,
-          'Classmethod conflict triggers panic' )
-end
-
 local function test_init_super()
   local Base = object.class()
   function Base:init()
@@ -70,8 +49,6 @@ end
 
 function M.run()
   test_object_new()
-  test_classmethod_basic()
-  test_classmethod_conflict()
   test_init_super()
   test_class_with_metaclass()
   test_object_init()

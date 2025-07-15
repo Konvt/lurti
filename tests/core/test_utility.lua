@@ -1,49 +1,65 @@
+local option = require( 'core.option' )
+local result = require( 'core.result' )
 local utility = require( 'core.utility' )
 local M = {}
 
-local function test_shallowcopy_table()
-  local inner = { x = 1 }
-  local t = { a = inner }
-  local copy = utility.shallowcopy( t )
-  assert( copy.a == inner,
-          'shallowcopy copies reference' )
-  assert( copy ~= t,
-          'shallowcopy creates new table' )
+local function test_ok_or_some()
+  local v = option.Some( 42 ):ok_or( 'error' )
+  assert( v:is_ok() == true,
+          'ok_or returns Ok when Some' )
 end
 
-local function test_shallowcopy_non_table()
-  local n = 42
-  local copy = utility.shallowcopy( n )
-  assert( copy == 42,
-          'shallowcopy keeps non-table value' )
+local function test_ok_or_none()
+  local v = option.None():ok_or( 'error' )
+  assert( v:is_err() == true,
+          'ok_or returns Err when None' )
 end
 
-local function test_deepcopy_simple()
-  local t = { a = { b = 2 } }
-  local copy = utility.deepcopy( t )
-  --- @diagnostic disable-next-line
-  assert( copy.a.b == 2,
-          'deepcopy keeps nested value' )
-  --- @diagnostic disable-next-line
-  assert( copy.a ~= t.a,
-          'deepcopy creates nested table' )
+local function test_ok_or_else_some()
+  local v = option.Some( 42 ):ok_or_else( function() return 'lazy error' end )
+  assert( v:is_ok() == true,
+          'ok_or_else returns Ok when Some' )
 end
 
-local function test_deepcopy_cycle()
-  local t = {}
-  t.self = t
-  local copy = utility.deepcopy( t )
-  assert( copy ~= t,
-          'deepcopy creates new table' )
-  assert( copy.self == copy,
-          'deepcopy keeps cycle' )
+local function test_ok_or_else_none()
+  local v = option.None():ok_or_else( function() return 'lazy error' end )
+  assert( v:is_err() == true,
+          'ok_or_else returns Err when None' )
+end
+
+local function test_result_ok()
+  local o = result.Ok( 42 ):ok()
+  assert( o:is_some() == true,
+          'ok returns Some when Ok' )
+end
+
+local function test_result_ok_err()
+  local o = result.Err( 'error' ):ok()
+  assert( o:is_none() == true,
+          'ok returns None when Err' )
+end
+
+local function test_result_err()
+  local o = result.Err( 'error' ):err()
+  assert( o:is_some() == true,
+          'err returns Some when Err' )
+end
+
+local function test_result_err_ok()
+  local o = result.Ok( 42 ):err()
+  assert( o:is_none() == true,
+          'err returns None when Ok' )
 end
 
 function M.run()
-  test_shallowcopy_table()
-  test_shallowcopy_non_table()
-  test_deepcopy_simple()
-  test_deepcopy_cycle()
+  test_ok_or_some()
+  test_ok_or_none()
+  test_ok_or_else_some()
+  test_ok_or_else_none()
+  test_result_ok()
+  test_result_ok_err()
+  test_result_err()
+  test_result_err_ok()
   print( 'utility tests all passed.' )
 end
 

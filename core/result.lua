@@ -4,7 +4,7 @@ local object = require( 'core.object' )
 local result = {}
 
 --- @class Result<T, E> : Object
---- @field private _ok boolean
+--- @field private _is_ok boolean
 --- @field private _val T | E
 result.Result = object.class()
 
@@ -15,33 +15,33 @@ result.Result = object.class()
 --- @return self
 function result.Result:init( ok, value )
   object.init_super( result.Result, self )
-  self._ok = ok
+  self._is_ok = ok
   self._val = value
   return self
 end
 
 --- Create a new Result object from given class and value.
 --- @generic C, T, E
---- @param cls C
---- @param ok boolean
+--- @param is_ok boolean
 --- @param value T | E
---- @return C
-function result.Result.new( cls, ok, value )
-  return cls():init( ok, value )
+--- @return self
+function result.Result:new( is_ok, value )
+  -- assert( rtti.is_type( self ) )
+  return self():init( is_ok, value )
 end
 
 --- Create a successful Result containing the given value.
---- @generic T
+--- @generic T, E
 --- @param value T
---- @return Result
+--- @return Result<T | E>
 function result.Ok( value )
   return result.Result:new( true, value )
 end
 
 --- Create an error Result containing the given error.
---- @generic E
+--- @generic T, E
 --- @param value E
---- @return Result
+--- @return Result<T | E>
 function result.Err( value )
   return result.Result:new( false, value )
 end
@@ -49,20 +49,20 @@ end
 --- Return true if the Result is Ok.
 --- @return boolean
 function result.Result:is_ok()
-  return self._ok
+  return self._is_ok
 end
 
 --- Return true if the Result is Err.
 --- @return boolean
 function result.Result:is_err()
-  return not self._ok
+  return not self._is_ok
 end
 
 --- Return the contained Ok value or raise if Err.
 --- @generic T
 --- @return T
 function result.Result:unwrap()
-  if not self._ok then
+  if not self._is_ok then
     panic.raise( panic.KIND.TYPE_ERROR, 'cannot unwrap an Err value' )
   end
   return self._val
@@ -72,7 +72,7 @@ end
 --- @generic E
 --- @return E
 function result.Result:unwrap_err()
-  if self._ok then
+  if self._is_ok then
     panic.raise( panic.KIND.TYPE_ERROR, 'cannot unwrap_err an Ok value' )
   end
   return self._val
@@ -80,24 +80,20 @@ end
 
 --- Return the contained Ok value or a default.
 --- @generic T
---- @param default_val T
+--- @param default T
 --- @return T
-function result.Result:unwrap_or( default_val )
-  if self._ok then
-    return self._val
-  end
-  return default_val
+function result.Result:unwrap_or( default )
+  if self._is_ok then return self._val end
+  return default
 end
 
 --- Return Ok value or compute default with function.
 --- @generic T
---- @param fn fun(): T
+--- @param default fun(): T
 --- @return T
-function result.Result:unwrap_or_else( fn )
-  if self._ok then
-    return self._val
-  end
-  return fn()
+function result.Result:unwrap_or_else( default )
+  if self._is_ok then return self._val end
+  return default()
 end
 
 --- Map the Ok value using function if Ok.
@@ -105,9 +101,7 @@ end
 --- @param fn fun( ok: T ): U
 --- @return Result<U, E>
 function result.Result:map( fn )
-  if self._ok then
-    return result.Ok( fn( self._val ) )
-  end
+  if self._is_ok then return result.Ok( fn( self._val ) ) end
   return result.Err( self._val )
 end
 
@@ -116,9 +110,7 @@ end
 --- @param fn fun( err: E ): F
 --- @return Result<T, F>
 function result.Result:map_err( fn )
-  if not self._ok then
-    return result.Err( fn( self._val ) )
-  end
+  if not self._is_ok then return result.Err( fn( self._val ) ) end
   return result.Ok( self._val )
 end
 
@@ -127,9 +119,7 @@ end
 --- @param fn fun( ok: T ): Result<U, E>
 --- @return Result<U, E>
 function result.Result:and_then( fn )
-  if self._ok then
-    return fn( self._val )
-  end
+  if self._is_ok then return fn( self._val ) end
   return result.Err( self._val )
 end
 
@@ -138,9 +128,7 @@ end
 --- @param fn fun( err: F ): Result<T, F>
 --- @return Result<T, F>
 function result.Result:or_else( fn )
-  if not self._ok then
-    return fn( self._val )
-  end
+  if not self._is_ok then return fn( self._val ) end
   return result.Ok( self._val )
 end
 
@@ -149,7 +137,7 @@ end
 --- @param res Result<U, E>
 --- @return Result<U, E>
 function result.Result:and_( res )
-  if self._ok then return res end
+  if self._is_ok then return res end
   return result.Err( self._val )
 end
 
@@ -158,7 +146,7 @@ end
 --- @param res Result<T, F>
 --- @return Result<T, F>
 function result.Result:or_( res )
-  if not self._ok then return res end
+  if not self._is_ok then return res end
   return result.Ok( self._val )
 end
 
@@ -167,7 +155,7 @@ end
 --- @param msg string
 --- @return T
 function result.Result:expect( msg )
-  if not self._ok then
+  if not self._is_ok then
     panic.raise( panic.KIND.TYPE_ERROR, msg )
   end
   return self._val
@@ -178,7 +166,7 @@ end
 --- @param msg string
 --- @return E
 function result.Result:expect_err( msg )
-  if self._ok then
+  if self._is_ok then
     panic.raise( panic.KIND.TYPE_ERROR, msg )
   end
   return self._val
@@ -189,7 +177,7 @@ end
 --- @param fn fun( ok: T ): nil
 --- @return self
 function result.Result:inspect( fn )
-  if self._ok then fn( self._val ) end
+  if self._is_ok then fn( self._val ) end
   return self
 end
 
@@ -198,7 +186,7 @@ end
 --- @param fn fun( err: E ): nil
 --- @return self
 function result.Result:inspect_err( fn )
-  if not self._ok then fn( self._val ) end
+  if not self._is_ok then fn( self._val ) end
   return self
 end
 

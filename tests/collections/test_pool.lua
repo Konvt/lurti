@@ -10,7 +10,7 @@ function Dummy:init( val )
   self.val = val
 end
 
-function Dummy:deepcopy()
+function Dummy:clone()
   return Dummy( self.val )
 end
 

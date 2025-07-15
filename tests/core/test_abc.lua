@@ -59,12 +59,22 @@ function M.test_abstract_instantiation()
           'abstract prevents instantiation' )
 end
 
-function M.test_ICopyable_methods()
-  local inst = abc.ICopyable()
-  assert( type( inst.deepcopy ) == 'function',
-          'ICopyable has deepcopy' )
-  assert( type( inst.shallowcopy ) == 'function',
-          'ICopyable has shallow copy' )
+function M.test_clone_returns_deepcopy()
+  local O = object.class( abc.ICopyable )
+  local o = O()
+  o.data = { nested = { 42 } }
+  local copy = o:clone()
+  assert( copy.data ~= o.data and copy.data.nested ~= o.data.nested,
+          'clone should return deep copy' )
+end
+
+function M.test_copy_returns_shallowcopy()
+  local O = object.class( abc.ICopyable )
+  local o = O()
+  o.data = { nested = { 42 } }
+  local copy = o:copy()
+  assert( copy.data == o.data,
+          'copy should return shallow copy' )
 end
 
 function M.run()
@@ -74,7 +84,8 @@ function M.run()
   M.test_is_abstract_true()
   M.test_abstract_on_non_abstract()
   M.test_abstract_instantiation()
-  M.test_ICopyable_methods()
+  M.test_clone_returns_deepcopy()
+  M.test_copy_returns_shallowcopy()
   print( 'abc tests all passed.' )
 end
 

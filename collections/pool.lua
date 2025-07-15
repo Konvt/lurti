@@ -12,7 +12,7 @@ pool.ObjectPool = object.class()
 --- @return self
 function pool.ObjectPool:init( prototype, num )
   object.init_super( pool.ObjectPool, self )
-  self.prototype = prototype:deepcopy()
+  self.prototype = prototype:clone()
   self.buffer = {}
   return self:produce( num )
 end
@@ -48,7 +48,7 @@ end
 --- @return self
 function pool.ObjectPool:produce( num )
   for _ = 1, num do
-    self.buffer[#self.buffer+1] = self.prototype:deepcopy()
+    self.buffer[#self.buffer+1] = self.prototype:clone()
   end
   return self
 end
@@ -74,7 +74,7 @@ end
 --- @return T
 function pool.ObjectPool:pop()
   if #self.buffer == 0 then
-    return self.prototype:deepcopy()
+    return self.prototype:clone()
   end
   local ret = self.buffer[#self.buffer]
   self.buffer[#self.buffer] = nil
