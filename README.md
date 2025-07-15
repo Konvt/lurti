@@ -153,9 +153,9 @@ meta.classmethod( Cat, { new = Cat.new } )
 Function that construct empty objects do not support overriding unless another metaclass is explicitly specified during inheritance.
 
 ## Meta class
-Like Python, Lurti's subtype system is built on top of the metaclass `lurti.core.meta.type`.
+Like Python, Lurti's subtype system is built on top of the metaclass `lurti.core.meta.Type`.
 
-Its usage is the same as in Python. For creating a new metaclass, you can refer to the implementation of `ABCMeta` in `lurti.core.abc`.
+Its usage is the same as in Python. For creating a new metaclass, you can refer to the implementation of `ABCMeta` in `lurti.core.abc` or the implementation of `EnumMeta` in `lurti.core.enum`.
 
 ## Define abstract classes/methods
 An abstract base class can be created using the metaclass `lurti.core.abc.ABCMeta`, but just like in python: if all the abstract methods of an abstract base class are implemented, then the abstract base class itself can also be instantiated.

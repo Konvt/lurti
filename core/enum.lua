@@ -54,15 +54,14 @@ function enum.EnumMeta:_new_( metatype, namespace, requirement )
               local item
               repeat
                 name, item = next( tbl, name )
-              until name == nil or (type( item ) ~= 'function'
-                  and not name:match( '^__' ))
+              until name == nil or (type( item ) ~= 'function' and name:sub( 1, 2 ) ~= '__')
               return name, item
             end, cls, nil
           end )
   return namespace
 end
 
---- @generic T, E, U
+--- @generic T, E
 --- @param cls T
 --- @param definition string[] | table<string, any> | any
 --- @return T | E
