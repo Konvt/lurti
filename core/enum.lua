@@ -48,25 +48,40 @@ function enum.EnumMeta:_new_( metatype, namespace, requirement )
             end
             rawset( cls, key, item )
           end )
+  rawset( mt, '__pairs',
+          function( cls )
+            return function( tbl, name )
+              local item
+              repeat
+                name, item = next( tbl, name )
+              until name == nil or (type( item ) ~= 'function'
+                  and not name:match( '^__' ))
+              return name, item
+            end, cls, nil
+          end )
   return namespace
 end
 
---- @generic T, E
+--- @generic T, E, U
 --- @param cls T
---- @param members? string[] | table<string, any>
+--- @param definition string[] | table<string, any> | any
 --- @return T | E
-function enum.EnumMeta:_instantiate_( cls, members )
-  if members == nil then
+function enum.EnumMeta:_instantiate_( cls, definition )
+  if definition == nil then
     return meta.super( self, enum.EnumMeta ):_instantiate_( cls )
-  elseif type( members ) ~= 'table' then
-    panic.raise( panic.KIND.TYPE_ERROR, 'members must be a table' )
+  end
+  local values = rawget( cls, '__value__' )
+  if values.map[definition] ~= nil then
+    return values.map[definition]
+  elseif type( definition ) ~= 'table' then
+    panic.raise( panic.KIND.TYPE_ERROR, 'members must be a table or an existing value' )
   end
 
   local is_array = false
-  if #members > 0 then
+  if #definition > 0 then
     local cursor = 1 -- members is an array
-    --- @cast members string[]
-    for i, v in ipairs( members ) do
+    --- @cast definition string[]
+    for i, v in ipairs( definition ) do
       if cursor ~= i then
         panic.raise( panic.KIND.TYPE_ERROR, 'the members indices are not consecutive ' )
       elseif type( v ) ~= 'string' then
@@ -76,8 +91,8 @@ function enum.EnumMeta:_instantiate_( cls, members )
     end
     is_array = true
   else
-    --- @cast members table<string, any>
-    for k, v in pairs( members ) do -- members is a dict
+    --- @cast definition table<string, any>
+    for k, v in pairs( definition ) do -- members is a dict
       if type( k ) ~= 'string' then
         panic.raise( panic.KIND.TYPE_ERROR, 'enum member must be a string' )
       elseif v == enum.auto then
@@ -88,12 +103,12 @@ function enum.EnumMeta:_instantiate_( cls, members )
 
   local enum_cls = meta.class( cls )
   if is_array then
-    for i = 1, #members do
-      enum_cls[members[i]] = enum.auto
+    for i = 1, #definition do
+      enum_cls[definition[i]] = enum.auto
     end
   else
-    --- @cast members table<string, any>
-    for k, v in pairs( members ) do
+    --- @cast definition table<string, any>
+    for k, v in pairs( definition ) do
       enum_cls[k] = v
     end
   end

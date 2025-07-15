@@ -98,6 +98,87 @@ local function test_value_function()
   assert( T.fn == f, 'function value preserved' )
 end
 
+local function test_iter_pairs()
+  --- @enum Direction
+  local Direction = meta.class( enum.Enum )
+  Direction.NORTH = 1
+  Direction.EAST = 2
+  Direction.SOUTH = 3
+  Direction.WEST = 4
+
+  local keys = {}
+  for k, v in pairs( Direction ) do
+    keys[#keys+1] = k
+    assert( type( k ) == 'string', 'Direction pair key type' )
+  end
+
+  local expected = { NORTH = true, EAST = true, SOUTH = true, WEST = true }
+  local count = 0
+  for _, k in ipairs( keys ) do
+    expected[k] = nil
+    count = count + 1
+  end
+
+  assert( count == 4, 'Not all enum members were iterated' )
+  for k in pairs( expected ) do
+    error( 'Missing enum member in iteration: ' .. k )
+  end
+end
+
+local function test_instantiate_existing_value()
+  --- @enum Sample
+  local Sample = meta.class( enum.Enum )
+  Sample.ONE = 1
+  Sample.TWO = 2
+  local inst = Sample( 1 )
+  assert( inst == Sample.ONE,
+          'instantiate returns existing value' )
+end
+
+local function test_error_on_non_table_members()
+  local status, err = pcall( function()
+    local E = enum.Enum( 123 )
+  end )
+  assert( status == false,
+          'instantiate non-table members error' )
+end
+
+local function test_error_on_non_string_in_array()
+  local status, err = pcall( function()
+    local E = enum.Enum( { 'A', 123 } )
+  end )
+  assert( status == false,
+          'instantiate non-string in array error' )
+end
+
+local function test_error_on_non_string_key_in_map()
+  local status, err = pcall( function()
+    local E = enum.Enum( { [123] = 1 } )
+  end )
+  assert( status == false,
+          'instantiate non-string key in map error' )
+end
+
+local function test_error_on_auto_in_map()
+  local status, err = pcall( function()
+    local E = enum.Enum( { A = enum.auto, B = 1 } )
+  end )
+  assert( status == false,
+          'instantiate auto value in map error' )
+end
+
+local function test_duplicate_value_shares_item()
+  local D = meta.class( enum.Enum )
+  D.A = 1
+  D.B = 1
+  assert( D.A.value == 1,
+          'duplicate value A value' )
+  assert( D.B.value == 1,
+          'duplicate value B value' )
+  assert( D.A.value == D.B.value,
+          'duplicate values equal' )
+end
+
 function M.run()
   test_basic()
   test_auto()
@@ -105,6 +186,13 @@ function M.run()
   test_instantiate_map()
   test_non_string_key_error()
   test_value_function()
+  test_iter_pairs()
+  test_instantiate_existing_value()
+  test_error_on_non_table_members()
+  test_error_on_non_string_in_array()
+  test_error_on_non_string_key_in_map()
+  test_error_on_auto_in_map()
+  test_duplicate_value_shares_item()
   print( 'enum tests all passed.' )
 end
 
