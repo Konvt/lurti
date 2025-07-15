@@ -51,12 +51,53 @@ function enum.EnumMeta:_new_( metatype, namespace, requirement )
   return namespace
 end
 
---- @generic T
+--- @generic T, E
 --- @param cls T
---- @return T
-function enum.EnumMeta:_instantiate_( cls, ... )
-  -- TODO: Color = Enum('Color', [('RED', 1), ('GREEN', 2), ('BLUE', 3)])
-  return meta.super( self, enum.EnumMeta ):_instantiate_( cls, ... )
+--- @param members? string[] | table<string, any>
+--- @return T | E
+function enum.EnumMeta:_instantiate_( cls, members )
+  if members == nil then
+    return meta.super( self, enum.EnumMeta ):_instantiate_( cls )
+  elseif type( members ) ~= 'table' then
+    panic.raise( panic.KIND.TYPE_ERROR, 'members must be a table' )
+  end
+
+  local is_array = false
+  if #members > 0 then
+    local cursor = 1 -- members is an array
+    --- @cast members string[]
+    for i, v in ipairs( members ) do
+      if cursor ~= i then
+        panic.raise( panic.KIND.TYPE_ERROR, 'the members indices are not consecutive ' )
+      elseif type( v ) ~= 'string' then
+        panic.raise( panic.KIND.TYPE_ERROR, 'enum member must be a string' )
+      end
+      cursor = cursor + 1
+    end
+    is_array = true
+  else
+    --- @cast members table<string, any>
+    for k, v in pairs( members ) do -- members is a dict
+      if type( k ) ~= 'string' then
+        panic.raise( panic.KIND.TYPE_ERROR, 'enum member must be a string' )
+      elseif v == enum.auto then
+        panic.raise( panic.KIND.FATAL_ERROR, 'the dictionary in lua does not guarantee the insertion order' )
+      end
+    end
+  end
+
+  local enum_cls = meta.class( cls )
+  if is_array then
+    for i = 1, #members do
+      enum_cls[members[i]] = enum.auto
+    end
+  else
+    --- @cast members table<string, any>
+    for k, v in pairs( members ) do
+      enum_cls[k] = v
+    end
+  end
+  return enum_cls
 end
 
 enum.Enum = meta.class( nil, enum.EnumMeta )
