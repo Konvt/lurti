@@ -147,4 +147,16 @@ function rtti.is_object( identifier )
   return typeinfo ~= nil and type( typeinfo.metatype ) == 'string'
 end
 
+--- If obj is the type instance of cls, return true.
+--- @generic T, U
+--- @param obj T
+--- @param cls U
+--- @return boolean
+function rtti.is_instance( obj, cls )
+  local typeinfo = getmetatable( cls )
+  if rawget( typeinfo, '_rtti' ) == nil then return false end
+  local classinfo = getmetatable( obj )
+  return classinfo == cls
+end
+
 return rtti
