@@ -228,6 +228,30 @@ local function test_replace()
           'replace should set new value' )
 end
 
+local function test_ok_or_some()
+  local v = option.Some( 42 ):ok_or( 'error' )
+  assert( v:is_ok() == true,
+          'ok_or returns Ok when Some' )
+end
+
+local function test_ok_or_none()
+  local v = option.None():ok_or( 'error' )
+  assert( v:is_err() == true,
+          'ok_or returns Err when None' )
+end
+
+local function test_ok_or_else_some()
+  local v = option.Some( 42 ):ok_or_else( function() return 'lazy error' end )
+  assert( v:is_ok() == true,
+          'ok_or_else returns Ok when Some' )
+end
+
+local function test_ok_or_else_none()
+  local v = option.None():ok_or_else( function() return 'lazy error' end )
+  assert( v:is_err() == true,
+          'ok_or_else returns Err when None' )
+end
+
 function M.run()
   test_is_some()
   test_none()
@@ -251,6 +275,10 @@ function M.run()
   test_take()
   test_take_if()
   test_replace()
+  test_ok_or_some()
+  test_ok_or_none()
+  test_ok_or_else_some()
+  test_ok_or_else_none()
   print( 'option tests all passed.' )
 end
 

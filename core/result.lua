@@ -190,4 +190,20 @@ function result.Result:inspect_err( fn )
   return self
 end
 
+--- @generic T
+--- @return Option<T>
+function result.Result:ok()
+  local option = require( 'core.option' )
+  if self._is_ok then return option.Some( self._val ) end
+  return option.None()
+end
+
+--- @generic T
+--- @return Option<T>
+function result.Result:err()
+  local option = require( 'core.option' )
+  if not self._is_ok then return option.Some( self._val ) end
+  return option.None()
+end
+
 return result

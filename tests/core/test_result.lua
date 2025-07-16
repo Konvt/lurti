@@ -193,6 +193,30 @@ local function test_inspect_err_not_called()
           'Ok should not call inspect_err' )
 end
 
+local function test_result_ok()
+  local o = result.Ok( 42 ):ok()
+  assert( o:is_some() == true,
+          'ok returns Some when Ok' )
+end
+
+local function test_result_ok_err()
+  local o = result.Err( 'error' ):ok()
+  assert( o:is_none() == true,
+          'ok returns None when Err' )
+end
+
+local function test_result_err()
+  local o = result.Err( 'error' ):err()
+  assert( o:is_some() == true,
+          'err returns Some when Err' )
+end
+
+local function test_result_err_ok()
+  local o = result.Ok( 42 ):err()
+  assert( o:is_none() == true,
+          'err returns None when Ok' )
+end
+
 function M.run()
   test_ok_is_ok()
   test_err_is_err()
@@ -221,6 +245,10 @@ function M.run()
   test_inspect_err()
   test_inspect_err_called()
   test_inspect_err_not_called()
+  test_result_ok()
+  test_result_ok_err()
+  test_result_err()
+  test_result_err_ok()
   print( 'result tests all passed.' )
 end
 

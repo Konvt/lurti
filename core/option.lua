@@ -245,4 +245,22 @@ function option.Option:replace( value )
   return option.None()
 end
 
+--- @generic T, E
+--- @param err E
+--- @return Result<T, E>
+function option.Option:ok_or( err )
+  local result = require( 'core.result' )
+  if self._is_some then return result.Ok( self._val ) end
+  return result.Err( err )
+end
+
+--- @generic T, E
+--- @param fn fun(): E
+--- @return Result<T, E>
+function option.Option:ok_or_else( fn )
+  local result = require( 'core.result' )
+  if self._is_some then return result.Ok( self._val ) end
+  return result.Err( fn() )
+end
+
 return option
