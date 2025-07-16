@@ -39,14 +39,23 @@ function extension.mixin( cls, fields )
     if indexer == nil then
       rawset( cls, '__index',
               function( _, key )
-                local value = cls[key]
-                return value ~= nil and value or rawget( cls, '__extension__' )[key]
+                local val = cls[key]
+                if val ~= nil then return val end
+                return rawget( cls, '__extension__' )[key]
+              end )
+    elseif type( indexer ) == 'function' then
+      rawset( cls, '__index',
+              function( self, key )
+                local val = indexer( self, key )
+                if val ~= nil then return val end
+                return rawget( cls, '__extension__' )[key]
               end )
     else
       rawset( cls, '__index',
-              function( self, key )
-                local value = type( indexer ) == 'function' and indexer( self, key ) or indexer[key]
-                return value ~= nil and value or rawget( cls, '__extension__' )[key]
+              function( _, key )
+                local val = indexer[key]
+                if val ~= nil then return val end
+                return rawget( cls, '__extension__' )[key]
               end )
     end
   end

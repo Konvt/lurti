@@ -147,19 +147,20 @@ function meta.super( identifier, cls )
   -- assert( rtti.has_rtti( identifier ) )
   local mro_table = meta.mroof( rtti.typeof( identifier ) )
   if cls ~= nil then
-    if mro_table.index[cls] == nil then return nil end
-    return mro_table.order[mro_table.index[cls] + 1]
+    local index = mro_table.index[cls]
+    if index == nil then return nil end
+    return mro_table.order[index + 1]
   end
   return mro_table.order[2] -- For Object it's nil.
 end
 
 --- Search for the key in the inheritance chain using MRO.
 --- @generic T
---- @param self T
+--- @param identifier T
 --- @param key any
 --- @return any
-function meta.c3( self, key )
-  local mro_chain = meta.mroof( rtti.typeof( self ) ).order
+function meta.c3( identifier, key )
+  local mro_chain = meta.mroof( rtti.typeof( identifier ) ).order
   for i = 1, #mro_chain do
     local val = rawget( mro_chain[i], key )
     if val ~= nil then return val end
@@ -222,6 +223,7 @@ function meta.classmethod( cls, method )
     rawset( cls, '__classmethod__', classmethods )
 
     local indexer = rawget( cls, '__index' )
+    -- assert( type( indexer ) == 'function' )
     rawset( cls, '__index',
             function( self, key )
               local classinfo = rtti.typeof( self )
@@ -229,7 +231,7 @@ function meta.classmethod( cls, method )
               if mthd ~= nil and mthd[key] ~= nil then
                 return function( _, ... ) return mthd[key]( classinfo, ... ) end
               end
-              return type( indexer ) == 'function' and indexer( self, key ) or indexer[key]
+              return indexer( self, key )
             end )
   end
   for name, fn in pairs( method ) do
@@ -293,7 +295,29 @@ function meta.Type:_new_( metatype, namespace, requirement )
         metaclass = self,
         base = requirement,
       },
-      __index = meta.c3,
+      __index = function( _, key )
+        --[[
+        Although this function has a first parameter,
+        it is actually useless because the __index query here is only triggered in the following two cases:
+        1. When the type is passed/accessed as a value;
+        2. When a direct instance of the type attempts to access a base class field.
+
+        In either case, The parameter to be searched is the namespace, that is, the class type itself.
+        Therefore, there is no need to obtain a parameter from the outside; it can be directly captured by the closure.
+
+        The only error boundary case is when attempting to replace the namespace itself
+        without correctly using the type construction process to obtain a new metatable.
+
+        Moreover, meta.c3 is not used here because it would repeatedly search for the type itself.
+        c3 is only exposed to users as a base class search algorithm.
+        ]]
+        local mro_chain = meta.mroof( rtti.typeof( namespace ) ).order
+        for i = 2, #mro_chain do -- skip the class itself
+          local val = rawget( mro_chain[i], key )
+          if val ~= nil then return val end
+        end
+        return nil
+      end,
       __call = function( cls, ... )
         return self:_instantiate_( cls, ... )
       end,
@@ -301,7 +325,8 @@ function meta.Type:_new_( metatype, namespace, requirement )
   local mro_chain = meta.mroof( namespace ).order
   for i = #mro_chain, 2, -1 do
     for _, metamethod in ipairs( meta.Type.inheritable_metamethods ) do
-      rawset( namespace, metamethod, rawget( mro_chain[i], metamethod ) )
+      local impl = rawget( mro_chain[i], metamethod )
+      if impl ~= nil then rawset( namespace, metamethod, impl ) end
     end
   end
   return namespace
