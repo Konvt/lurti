@@ -254,7 +254,22 @@ end
 ]]
 
 --- @class Type : Object
+--- @field private inheritable_metamethods string[]
 meta.Type = {}
+
+meta.Type.inheritable_metamethods = {
+  -- Lua 5.1
+  '__newindex', '__add', '__sub', '__mul', '__div',
+  '__mod', '__pow', '__unm', '__concat',
+  '__eq', '__lt', '__le', '__tostring',
+
+  -- Lua 5.2+
+  '__len', '__pairs', '__ipairs',
+
+  -- Lua 5.3
+  '__band', '__bor', '__bxor', '__bnot',
+  '__shl', '__shr', '__idiv',
+}
 
 --- @generic T
 --- @param requirement T[] | nil
@@ -283,7 +298,12 @@ function meta.Type:_new_( metatype, namespace, requirement )
         return self:_instantiate_( cls, ... )
       end,
     } )
-  meta.mroof( namespace )
+  local mro_chain = meta.mroof( namespace ).order
+  for i = #mro_chain, 2, -1 do
+    for _, metamethod in ipairs( meta.Type.inheritable_metamethods ) do
+      rawset( namespace, metamethod, rawget( mro_chain[i], metamethod ) )
+    end
+  end
   return namespace
 end
 
