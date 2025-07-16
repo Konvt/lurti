@@ -5,7 +5,7 @@ local function include( mod_name, modules )
   return setmetatable( {}, {
     __index = function( tbl, key )
       local ok, mod = pcall( require, prefix .. modules[key] )
-      if not ok then error( 'module "' .. prefix .. modules[key] .. '" not found in ' .. mod_name ) end
+      if not ok then error( 'module "' .. prefix .. modules[key] .. '" not found in ' .. mod_name, 2 ) end
       tbl[key] = mod
       return mod
     end,
@@ -20,6 +20,7 @@ return {
       rtti = 'rtti',
       meta = 'meta',
       abc = 'abc',
+      enum = 'enum',
       result = 'result',
       extension = 'extension',
       utility = 'utility',
