@@ -160,7 +160,9 @@ end
 --- @param key any
 --- @return any
 function meta.c3( identifier, key )
-  local mro_chain = meta.mroof( rtti.typeof( identifier ) ).order
+  local mro_table = meta.mroof( rtti.typeof( identifier ) )
+  if mro_table == nil then return nil end
+  local mro_chain = mro_table.order
   for i = 1, #mro_chain do
     local val = rawget( mro_chain[i], key )
     if val ~= nil then return val end
@@ -223,16 +225,37 @@ function meta.classmethod( cls, method )
     rawset( cls, '__classmethod__', classmethods )
 
     local indexer = rawget( cls, '__index' )
-    -- assert( type( indexer ) == 'function' )
-    rawset( cls, '__index',
-            function( self, key )
-              local classinfo = rtti.typeof( self )
-              local mthd = rawget( classinfo, '__classmethod__' )
-              if mthd ~= nil and mthd[key] ~= nil then
-                return function( _, ... ) return mthd[key]( classinfo, ... ) end
-              end
-              return indexer( self, key )
-            end )
+    if indexer == nil then
+      rawset( cls, '__index',
+              function( self, key )
+                local classinfo = rtti.typeof( self )
+                local mthd = rawget( classinfo, '__classmethod__' )
+                if mthd ~= nil and mthd[key] ~= nil then
+                  return function( _, ... ) return mthd[key]( classinfo, ... ) end
+                end
+                return nil
+              end )
+    elseif type( indexer ) == 'function' then
+      rawset( cls, '__index',
+              function( self, key )
+                local classinfo = rtti.typeof( self )
+                local mthd = rawget( classinfo, '__classmethod__' )
+                if mthd ~= nil and mthd[key] ~= nil then
+                  return function( _, ... ) return mthd[key]( classinfo, ... ) end
+                end
+                return indexer( self, key )
+              end )
+    else
+      rawset( cls, '__index',
+              function( self, key )
+                local classinfo = rtti.typeof( self )
+                local mthd = rawget( classinfo, '__classmethod__' )
+                if mthd ~= nil and mthd[key] ~= nil then
+                  return function( _, ... ) return mthd[key]( classinfo, ... ) end
+                end
+                return indexer[key]
+              end )
+    end
   end
   for name, fn in pairs( method ) do
     if rawget( cls, name ) ~= fn then
@@ -287,41 +310,17 @@ end
 --- @return U
 function meta.Type:_new_( metatype, namespace, requirement )
   namespace.__index = namespace
-  setmetatable(
-    namespace,
-    {
-      _rtti = {
-        metatype = metatype,
-        metaclass = self,
-        base = requirement,
-      },
-      __index = function( _, key )
-        --[[
-        Although this function has a first parameter,
-        it is actually useless because the __index query here is only triggered in the following two cases:
-        1. When the type is passed/accessed as a value;
-        2. When a direct instance of the type attempts to access a base class field.
-
-        In either case, The parameter to be searched is the namespace, that is, the class type itself.
-        Therefore, there is no need to obtain a parameter from the outside; it can be directly captured by the closure.
-
-        The only error boundary case is when attempting to replace the namespace itself
-        without correctly using the type construction process to obtain a new metatable.
-
-        Moreover, meta.c3 is not used here because it would repeatedly search for the type itself.
-        c3 is only exposed to users as a base class search algorithm.
-        ]]
-        local mro_chain = meta.mroof( rtti.typeof( namespace ) ).order
-        for i = 2, #mro_chain do -- skip the class itself
-          local val = rawget( mro_chain[i], key )
-          if val ~= nil then return val end
-        end
-        return nil
-      end,
-      __call = function( cls, ... )
-        return self:_instantiate_( cls, ... )
-      end,
-    } )
+  local mt = {
+    _rtti = {
+      metatype = metatype,
+      metaclass = self,
+      base = requirement,
+    },
+    __call = function( cls, ... )
+      return self:_construct_( cls, ... )
+    end,
+  }
+  setmetatable( namespace, mt )
   local mro_chain = meta.mroof( namespace ).order
   for i = #mro_chain, 2, -1 do
     for _, metamethod in ipairs( meta.Type.inheritable_metamethods ) do
@@ -329,6 +328,10 @@ function meta.Type:_new_( metatype, namespace, requirement )
       if impl ~= nil then rawset( namespace, metamethod, impl ) end
     end
   end
+  -- The performance of table queries is far superior to that of function calls.
+  -- Therefore, we directly point the __index in the metatable of the type
+  -- to the direct base class recursively according to MRO.
+  mt.__index = mro_chain[2]
   return namespace
 end
 
@@ -341,12 +344,12 @@ function meta.Type:_init_( namespace, requirement )
   return namespace
 end
 
---- Create a instance of the class, this is a classmethod.
+--- Construct an empty instance of the class, this is a classmethod.
 --- It's equivalent to `__call__` of metaclass in Python.
 --- @generic T
 --- @param cls T
 --- @return T
-function meta.Type:_instantiate_( cls, ... )
+function meta.Type:_construct_( cls, ... )
   -- assert( rtti.is_type( cls ) )
   local obj = setmetatable( {}, cls )
   return obj
@@ -368,6 +371,10 @@ end
 --- @generic T
 --- @class Object
 meta.Object = meta.newtype( 'class', nil, meta.Type )
+
+function meta.Object.foo()
+  return 'From Object'
+end
 
 --- Object method, initialize a existed Object.
 --- @return self

@@ -23,7 +23,6 @@ return {
       enum = 'enum',
       result = 'result',
       extension = 'extension',
-      utility = 'utility',
     } ),
   collections = include(
     'collections',

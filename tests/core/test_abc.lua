@@ -54,7 +54,7 @@ end
 local function test_abstract_instantiation()
   local C = meta.class( nil, abc.ABCMeta )
   abc.abstract( C, 'foo' )
-  local ok, err = pcall( function() abc.ABCMeta:_instantiate_( C ) end )
+  local ok, err = pcall( function() C() end )
   assert( not ok and err ~= nil and err:match( 'abstract class' ),
           'abstract prevents instantiation' )
 end

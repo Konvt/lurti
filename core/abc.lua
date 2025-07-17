@@ -109,11 +109,11 @@ end
 --- @generic T
 --- @param cls T
 --- @return T
-function abc.ABCMeta:_instantiate_( cls, ... )
+function abc.ABCMeta:_construct_( cls, ... )
   if abc.is_abstract( cls ) then
     panic.raise( panic.KIND.TYPE_ERROR, 'attempt to instantiate an abstract class' )
   end
-  return meta.super( self, abc.ABCMeta ):_instantiate_( cls, ... )
+  return meta.super( self, abc.ABCMeta ):_construct_( cls, ... )
 end
 
 --- @class ICopyable : Object

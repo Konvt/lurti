@@ -7,7 +7,6 @@ return {
     enum = require( 'core.enum' ),
     result = require( 'core.result' ),
     extension = require( 'core.extension' ),
-    utility = require( 'core.utility' ),
   },
   collections = {
     pool = require( 'collections.pool' ),

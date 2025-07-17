@@ -64,7 +64,7 @@ end
 local function run_test( mod )
   local ok, t = pcall( require, mod )
   if not ok then
-    error( 'Failed to load ' .. mod .. ': ' .. tostring( t ) )
+    error( 'Failed to load ' .. mod .. ': ' .. tostring( t ), 2 )
   end
   if type( t.run ) == 'function' then
     t.run()

@@ -65,9 +65,9 @@ end
 --- @param cls T
 --- @param definition string[] | table<string, any> | any
 --- @return T | E
-function enum.EnumMeta:_instantiate_( cls, definition )
+function enum.EnumMeta:_construct_( cls, definition )
   if definition == nil then
-    return meta.super( self, enum.EnumMeta ):_instantiate_( cls )
+    return meta.super( self, enum.EnumMeta ):_construct_( cls )
   end
   local values = rawget( cls, '__value__' )
   if values.map[definition] ~= nil then
@@ -114,6 +114,7 @@ function enum.EnumMeta:_instantiate_( cls, definition )
   return enum_cls
 end
 
+--- @class Enum : Object
 enum.Enum = meta.class( nil, enum.EnumMeta )
 
 --- @generic T
