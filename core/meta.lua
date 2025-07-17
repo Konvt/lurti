@@ -14,9 +14,9 @@ local panic = require( 'core.panic' )
 ---
 ---           metaclass: table,
 ---           base: table[],
----           mro: [index, order array],
+---           mro: [index, resolution order list],
 ---         },
----         __index: a function,
+---         __index: pointing to the direct base class according to MRO,
 ---       }
 ---     }
 --- ```
