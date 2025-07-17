@@ -136,6 +136,50 @@ local function test_object_init()
           'Init returns self' )
 end
 
+local function test_classmethod_basic()
+  local cls = meta.class()
+  function cls.foo( self ) return self end
+
+  meta.classmethod( cls, 'foo' )
+  local obj = cls:new()
+  local ret = obj:foo()
+  assert( ret == cls,
+          'foo should return class itself after classmethod' )
+end
+
+local function test_classmethod_multiple()
+  local cls = meta.class()
+  function cls.a( self ) return self end
+
+  function cls.b( self ) return self end
+
+  meta.classmethod( cls, { 'a', 'b' } )
+  local obj = cls:new()
+  assert( obj:a() == cls,
+          'a should return class itself after classmethod' )
+  assert( obj:b() == cls,
+          'b should return class itself after classmethod' )
+end
+
+local function test_classmethod_missing()
+  local cls = meta.class()
+  local ok, err = pcall( function()
+    meta.classmethod( cls, 'not_exist' )
+  end )
+  assert( ok == false and err ~= nil and err:match( 'must exist in class and is a function' ),
+          'classmethod should fail if method does not exist' )
+end
+
+local function test_classmethod_not_function()
+  local cls = meta.class()
+  cls.value = 123
+  local ok, err = pcall( function()
+    meta.classmethod( cls, 'value' )
+  end )
+  assert( ok == false and err ~= nil and err:match( 'must exist in class and is a function' ),
+          'classmethod should fail if target is not function' )
+end
+
 function M.run()
   test_metaclassof()
   test_mroof()
@@ -148,6 +192,10 @@ function M.run()
   test_init_super()
   test_class_with_metaclass()
   test_object_init()
+  test_classmethod_basic()
+  test_classmethod_multiple()
+  test_classmethod_missing()
+  test_classmethod_not_function()
   print( 'meta tests all passed.' )
 end
 

@@ -133,7 +133,6 @@ end
 --- @return boolean
 function meta.is_base_of( base, derived )
   -- assert( rtti.is_type( base ) and rtti.is_type( derived ) )
-  if base == derived then return true end
   local mro_table = meta.mroof( derived )
   return mro_table.index[base] ~= nil
 end
@@ -212,57 +211,28 @@ function meta.newtype( metatype, requirement, metaclass )
                            requirement )
 end
 
---- Mark functions as class methods on a class,
---- raising an error if passed functions do not exist in class.
+--- A decorator, convert the passed-in marked method to a class method.
 --- @generic T
 --- @param cls T
---- @param method table<string, fun(...)>
+--- @param methods string | string[]
 --- @return T
-function meta.classmethod( cls, method )
-  local classmethods = rawget( cls, '__classmethod__' )
-  if classmethods == nil then
-    classmethods = {}
-    rawset( cls, '__classmethod__', classmethods )
-
-    local indexer = rawget( cls, '__index' )
-    if indexer == nil then
-      rawset( cls, '__index',
-              function( self, key )
-                local classinfo = rtti.typeof( self )
-                local mthd = rawget( classinfo, '__classmethod__' )
-                if mthd ~= nil and mthd[key] ~= nil then
-                  return function( _, ... ) return mthd[key]( classinfo, ... ) end
-                end
-                return nil
-              end )
-    elseif type( indexer ) == 'function' then
-      rawset( cls, '__index',
-              function( self, key )
-                local classinfo = rtti.typeof( self )
-                local mthd = rawget( classinfo, '__classmethod__' )
-                if mthd ~= nil and mthd[key] ~= nil then
-                  return function( _, ... ) return mthd[key]( classinfo, ... ) end
-                end
-                return indexer( self, key )
-              end )
-    else
-      rawset( cls, '__index',
-              function( self, key )
-                local classinfo = rtti.typeof( self )
-                local mthd = rawget( classinfo, '__classmethod__' )
-                if mthd ~= nil and mthd[key] ~= nil then
-                  return function( _, ... ) return mthd[key]( classinfo, ... ) end
-                end
-                return indexer[key]
-              end )
+function meta.classmethod( cls, methods )
+  if type( methods ) == 'string' then
+    methods = { methods }
+    --- @cast methods string[]
+  end
+  for _, method in ipairs( methods ) do
+    local field = rawget( cls, method )
+    if type( field ) ~= 'function' then
+      panic.raise( panic.KIND.FIELD_CONFLICT,
+                   'method "' .. method .. '" must exist in class and is a function' )
     end
   end
-  for name, fn in pairs( method ) do
-    if rawget( cls, name ) ~= fn then
-      panic.raise( panic.KIND.FIELD_CONFLICT,
-                   'method "' .. name .. '" must exist in class and match the passed function' )
-    end
-    classmethods[name] = fn
+  for _, method in ipairs( methods ) do
+    local field = rawget( cls, method )
+    rawset( cls, method, function( self, ... )
+      return field( rtti.typeof( self ), ... )
+    end )
   end
   return cls
 end
@@ -344,7 +314,7 @@ function meta.Type:_init_( namespace, requirement )
   return namespace
 end
 
---- Construct an empty instance of the class, this is a classmethod.
+--- Construct an empty instance of the class, this is a class method.
 --- It's equivalent to `__call__` of metaclass in Python.
 --- @generic T
 --- @param cls T
@@ -372,10 +342,6 @@ end
 --- @class Object
 meta.Object = meta.newtype( 'class', nil, meta.Type )
 
-function meta.Object.foo()
-  return 'From Object'
-end
-
 --- Object method, initialize a existed Object.
 --- @return self
 function meta.Object:init()
@@ -397,6 +363,8 @@ do
                     requirement )
 end
 
+meta.classmethod( meta.Type, { '_prepare_', '_new_', '_init_', '_construct_' } )
+
 --- @generic T, U
 --- @param base? T | T[]
 --- @param metaclass? Type
@@ -417,7 +385,6 @@ end
 --- @param ... any @ arguments passed to superclass init
 --- @return U
 function meta.init_super( cls, obj, ... )
-  -- assert( mro_table.index[cls] ~= nil )
   return meta.super( obj, cls ).init( obj, ... )
 end
 

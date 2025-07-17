@@ -19,22 +19,21 @@ end
 
 --- Create a new pool without initial objects.
 --- @generic T
---- @param cls T
 --- @param prototype ICopyable
---- @return T
-function pool.ObjectPool.new( cls, prototype )
-  return cls():init( prototype, 0 )
+--- @return self
+function pool.ObjectPool:new( prototype )
+  return self():init( prototype, 0 )
 end
 
 --- Create a new pool with initial objects.
---- @generic T
---- @param cls T
 --- @param prototype ICopyable
 --- @param num integer @ The number of objects to produce initially.
---- @return T
-function pool.ObjectPool.new_with( cls, prototype, num )
-  return cls():init( prototype, num )
+--- @return self
+function pool.ObjectPool:new_with( prototype, num )
+  return self():init( prototype, num )
 end
+
+meta.classmethod( pool.ObjectPool, { 'new', 'new_with' } )
 
 --- Get current pool size
 --- @return integer

@@ -116,6 +116,8 @@ function abc.ABCMeta:_construct_( cls, ... )
   return meta.super( self, abc.ABCMeta ):_construct_( cls, ... )
 end
 
+meta.classmethod( abc.ABCMeta, { '_new_', '_init_', '_construct_' } )
+
 --- @class ICopyable : Object
 abc.ICopyable = meta.class( nil, abc.ABCMeta )
 
