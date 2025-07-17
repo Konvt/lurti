@@ -114,6 +114,8 @@ function enum.EnumMeta:_construct_( cls, definition )
   return enum_cls
 end
 
+meta.classmethod( enum.EnumMeta, { '_new_', '_construct_' } )
+
 --- @class Enum : Object
 enum.Enum = meta.class( nil, enum.EnumMeta )
 

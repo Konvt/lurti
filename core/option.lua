@@ -22,12 +22,11 @@ end
 
 --- Create a new Option object from given class and value.
 --- @generic C, T
---- @param cls C
 --- @param is_some boolean
 --- @param value? T
---- @return C
-function option.Option.new( cls, is_some, value )
-  return cls():init( is_some, value )
+--- @return self
+function option.Option:new( is_some, value )
+  return self():init( is_some, value )
 end
 
 --- Create a Option with value.

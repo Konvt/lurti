@@ -139,12 +139,12 @@ function Cat.new( cls, name ) -- Please note: The new() should be a class method
   -- return meta.Object:new( name )
 end
 
---- If you don't mind the performance overhead, then you can use the meta.classMethod() function
+--- If you don't mind the performance overhead, then you can use the meta.classMethod() decorator
 --- to mark the new() as a classmethod.
 ---
 --- In this way, even if the method is called on an instance object,
 --- it can be correctly called as the type itself.
-meta.classmethod( Cat, { new = Cat.new } )
+meta.classmethod( Cat, 'new' )
 
 --- If you attempt to bind a non-existent function, an error will be triggered.
 --- Therefore, you should mark a function as a class method after defining it.
