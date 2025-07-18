@@ -142,7 +142,7 @@ end
 --- @param identifier T
 --- @param cls? V
 --- @return U | nil
-function meta.super( identifier, cls )
+function meta.superof( identifier, cls )
   -- assert( rtti.has_rtti( identifier ) )
   local mro_table = meta.mroof( rtti.typeof( identifier ) )
   if cls ~= nil then
@@ -385,7 +385,7 @@ end
 --- @param ... any @ arguments passed to superclass init
 --- @return U
 function meta.init_super( cls, obj, ... )
-  return meta.super( obj, cls ).init( obj, ... )
+  return meta.superof( obj, cls ).init( obj, ... )
 end
 
 return meta

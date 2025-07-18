@@ -13,7 +13,7 @@ enum.EnumMeta = meta.metaclass()
 --- @param requirement T[] | nil
 --- @return U
 function enum.EnumMeta:_new_( metatype, namespace, requirement )
-  meta.super( self, enum.EnumMeta )._new_( self, metatype, namespace, requirement )
+  meta.superof( self, enum.EnumMeta )._new_( self, metatype, namespace, requirement )
   local mt = getmetatable( namespace )
   rawset( mt, '__newindex',
           function( cls, key, val )
@@ -67,7 +67,7 @@ end
 --- @return T | E
 function enum.EnumMeta:_construct_( cls, definition )
   if definition == nil then
-    return meta.super( self, enum.EnumMeta ):_construct_( cls )
+    return meta.superof( self, enum.EnumMeta ):_construct_( cls )
   end
   local values = rawget( cls, '__value__' )
   if values.map[definition] ~= nil then

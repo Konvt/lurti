@@ -65,7 +65,7 @@ abc.ABCMeta = meta.metaclass()
 --- @param namespace U
 --- @return U
 function abc.ABCMeta:_new_( metatype, requirement, namespace )
-  namespace = meta.super( self, abc.ABCMeta )._new_( self, metatype, requirement, namespace )
+  namespace = meta.superof( self, abc.ABCMeta )._new_( self, metatype, requirement, namespace )
   --- @type table<string, Object>
   local abstract = {}
   return rawset( namespace, '__abstract__', abstract )
@@ -78,7 +78,7 @@ end
 --- @return U
 function abc.ABCMeta:_init_( requirement, namespace )
   -- assert( type( rawget( namespace, '__abstract__' ) ) == 'table' )
-  namespace = meta.super( self, abc.ABCMeta )._init_( self, requirement, namespace )
+  namespace = meta.superof( self, abc.ABCMeta )._init_( self, requirement, namespace )
   --- @type table<string, Object>
   local abstract = {}
   local mro_chain = meta.mroof( namespace ).order
@@ -113,7 +113,7 @@ function abc.ABCMeta:_construct_( cls, ... )
   if abc.is_abstract( cls ) then
     panic.raise( panic.KIND.TYPE_ERROR, 'attempt to instantiate an abstract class' )
   end
-  return meta.super( self, abc.ABCMeta ):_construct_( cls, ... )
+  return meta.superof( self, abc.ABCMeta ):_construct_( cls, ... )
 end
 
 meta.classmethod( abc.ABCMeta, { '_new_', '_init_', '_construct_' } )

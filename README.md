@@ -88,8 +88,8 @@ local object_d = D:new()
 --- Expected output sequence:
 --- A C B D
 
---- Get the super class in MRO with `super()` in lurti.core.meta
-assert( B == lurti.core.meta.super( object_d ) )
+--- Get the super class in MRO with `superof()` in lurti.core.meta
+assert( B == lurti.core.meta.superof( object_d ) )
 ```
 
 ## Class constructor
@@ -125,7 +125,7 @@ function Cat:init( name )
 end
 ```
 
-When using the `new()` inherited from object, since LSP is not so intelligent, the prompt for the function parameter list is not very friendly.
+When using the `new()` inherited from `Object`, since LSP is not so intelligent, the prompt for the function parameter list is not very friendly.
 
 At this point, you can explicitly provide a rewrite of `new()`.
 
@@ -162,7 +162,7 @@ An abstract base class can be created using the metaclass `lurti.core.abc.ABCMet
 
 ```lua
 local lurti = require( 'path.to.lurti' )
-local object = lurti.core.object
+local meta = lurti.core.meta
 local abc = lurti.core.abc
 
 --- @class IFlyable
