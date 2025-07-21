@@ -363,8 +363,6 @@ do
                     requirement )
 end
 
-meta.classmethod( meta.Type, { '_prepare_', '_new_', '_init_', '_construct_' } )
-
 --- @generic T, U
 --- @param base? T | T[]
 --- @param metaclass? Type
